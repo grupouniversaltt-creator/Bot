@@ -6,6 +6,6 @@
     "start": "node index.cjs"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0"
+    "@whiskeysockets/baileys": "latest"
   }
 }
