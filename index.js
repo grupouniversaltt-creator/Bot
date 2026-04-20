@@ -1,4 +1,8 @@
-import makeWASocket, { useMultiFileAuthState, fetchLatestBaileysVersion } from "@whiskeysockets/baileys"
+import makeWASocket, {
+  useMultiFileAuthState,
+  fetchLatestBaileysVersion,
+  DisconnectReason
+} from "@whiskeysockets/baileys"
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("auth")
@@ -6,28 +10,33 @@ async function startBot() {
 
   const sock = makeWASocket({
     auth: state,
-    version
+    version,
+    browser: ["Ubuntu", "Chrome", "20.0.04"]
   })
 
   sock.ev.on("creds.update", saveCreds)
 
   sock.ev.on("connection.update", async (update) => {
-    const { connection } = update
+    const { connection, lastDisconnect } = update
+
+    if (connection === "close") {
+      console.log("❌ Conexión cerrada")
+
+      // 🔥 REINTENTO AUTOMÁTICO
+      startBot()
+    }
 
     if (connection === "open") {
       console.log("✅ BOT CONECTADO")
     }
-
-    if (connection === "close") {
-      console.log("❌ DESCONECTADO")
-    }
   })
 
-  // 🔥 CÓDIGO DE VINCULACIÓN
+  // 🔥 GENERAR CÓDIGO SI NO ESTÁ REGISTRADO
   if (!sock.authState.creds.registered) {
-    const code = await sock.requestPairingCode(5493888457648)
-    console.log("📱CÓDIGO:", code)
+    const code = await sock.requestPairingCode("5493888457648")
+    console.log("📱 CÓDIGO:", code)
   }
 }
 
 startBot()
+
