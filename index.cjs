@@ -9,12 +9,29 @@ async function startBot() {
 
     sock.ev.on("creds.update", saveCreds)
 
-    if (!sock.authState.creds.registered) {
-        const numero = "5493888457648"
+    sock.ev.on("connection.update", async (update) => {
+        const { connection } = update
 
-        const code = await sock.requestPairingCode(numero)
-        console.log("🔥 TU CODIGO ES:", code)
-    }
+        if (connection === "open") {
+            console.log("✅ Conectado a WhatsApp")
+        }
+
+        if (connection === "close") {
+            console.log("❌ Conexión cerrada")
+        }
+
+        // 👇 ACA pedimos el código correctamente
+        if (!sock.authState.creds.registered) {
+            const numero = "5493888457648"
+
+            try {
+                const code = await sock.requestPairingCode(numero)
+                console.log("🔥 TU CODIGO ES:", code)
+            } catch (err) {
+                console.log("❌ Error al pedir código:", err)
+            }
+        }
+    })
 }
 
 startBot()
